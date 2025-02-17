@@ -1,80 +1,124 @@
+/*
+const http = require('http'); // Import Node.js core module
+
+const host = 'localhost'; // Localhost
+const port = 8000; // Port number
+
+// กำหนด listener ให้กับ server เมื่อปิด เว็บไปที่ http://localhost:8000 จะเรียกใช้งาน function requireListener
+const requireListener = function (req, res) {
+  res.writeHead(200);
+  res.end("My first server!"); 
+}
+
+const server = http.createServer(requireListener); 
+server.listen(port, host, () => {
+  console.log(`Server is running on http://${host}:${port}`);
+});
+*/
+
 const express = require('express');
 const bodyParser = require('body-parser');
+const mysql = require('mysql2/promise');
 const app = express();
 
 const port = 8000;
+
 app.use(bodyParser.json());
 
 let users = []
-let counter =1 
 
+let conn = null
+const initMySQL = async () => {
+   const conn = await mysql.createConnection({
+    host: 'localhost',
+      user: 'root',
+      password: 'root',
+      database: 'webdb',
+      port: 8830
+    })
+}
 /*
-GET /users สำหรับแสดงข้อมูล user ทั้งหมดที่บันทึกไว้
-POST /user สำหรับสร้างข้อมูล user ใหม่ที่บันทึกเข้าไป
-GET /user/:id สำหรับดึงข้อมูล user รายคนออกมา
-PUT /user/:id สำหรับแก้ไขข้อมูล user รายคน(ตาม id ที่บันทึกเข้าไป)
-DELETE /user/:id สำหรับลบข้อมูล user รายคน(ตาม id ที่บันทึกเข้าไป)
+app.get('/testdbnew',async (req, res) => {
+  try {
+     const results = await conn.query('Select * FROM user')
+     res.json(results[0])
+  } catch (error) {
+    console.log('error',error.message)
+    res.status(500).json({error: 'Error fetching users'})
+  } 
+})
+/*
+GET /users ใช้สำหรับ get users ทั้งหมดที่บันทึกไว้
+POST /userห ใช้สำหรับสร้าง users ใหม่บันทึกเข้าไป
+GET /users/:id สำหรับดึง users รายคนออกมา
+PUT /users/:id ใช้สำหรับแก้ไข users รายคน (ตาม id ที่บันทึกเข้าไป)
+DELETE /users/:id ใช้สำหรับลบ users รายคน (ตาม id ที่บันทึกเข้าไป)
 */
 
-
-
-//path: GET/users ใช้สำหรับแสดงข้อมูล user ทั้งหมด
-app.get('/users', (req, res) => {
-   res.json(users);
-
+//path= GET /users ใช้สำหรับ get users ทั้งหมดที่บันทึกไว้
+app.get('/users', async(req, res) => {
+    const results = await conn.query('Select * FROM user')
+    res.json(results[0])
 })
-//path: /user ใช้สำหรับสร้างข้อมูล user ใหม่
-app.post('/user', (req, res) => {
-    let user = req.body;
-    user.id = counter
-    counter+=1
-    users.push(user);
-    res.json({
-        message: 'Create new user successfully',
-        user: user
-    });
+
+// path= POST/users ใช้สำหรับสร้าง users ใหม่บันทึกเข้าไป
+app.post('/users', async(req, res) => {
+  let user = req.body;
+  const results = await conn.query('INSERT INTO user SET ?' , user)
+  
+  console.log('results', results)
+  res.json({
+    message: "Create user successfully",
+    data: results[0]
+  })
 })
-//path: PUT /user/:id ใช้สำหรับเเก้ไขข้อมูล user ตาม id ที่ระบุ
-app.put('/user/:id', (req, res) => {
-    let id = req.params.id;
-    let updateUser = req.body;
-    //ค้นหา users ที่ต้องการเเก้ไข
-    let selectindex = users.findIndex(user => user.id == id)
 
-    //เเก้ไขข้อมูล user 
-    if(updateUser.firstname){
-       users[selectindex].firstname = updateUser.firstname || users[selectindex].firstname
-    }
-    if(updateUser.lastname){
-       users[selectindex].lastname = updateUser.lastname || users[selectindex].lastname
-    }
+//path= GET /users/:id สำหรับดึง users รายคนออกมา
+app.get('/users/:id', (req, res) => {
+  let id = req.params.id;
+  // ค้นหา  users หรือ index ที่ต้องการดึงข้อมูล
+  let selectedIndex = users.findIndex(user => user.id == id)
+  res.json(users[selectedIndex])
+});
+
+
+//path: PUT /users/:id ใช้สำหรับแก้ไขข้อมูล user ที่มี id เป็นตัวเเปร
+app.put('/users/:id', (req, res) => {
+  let id = req.params.id;
+  let upadateUser = req.body;
+  // หา users จาก id ที่ส่งมา
+  let selectedIndex = users.findIndex(user => user.id == id)
+  
+    users[selectedIndex].firstname = upadateUser.firstname || users[selectedIndex].firstname
+    users[selectedIndex].lastname = upadateUser.lastname || users[selectedIndex].lastname
+    users[selectedIndex].age = upadateUser.age || users[selectedIndex].age
+    users[selectedIndex].gender = upadateUser.gender || users[selectedIndex].gender
 
     res.json({
-        message: 'Update user successfully',
-        data: {
-        user: updateUser,
-        indexUpdated: selectindex
-        
-        }
+      message: "Update user successfully",
+      data: {
+        user:upadateUser,
+        indexUpdate: selectedIndex
+      }
+  })
+  // users ที่ upadate ใหม่ update กลับไปเก็บใน users เดิม
+})
+
+//path: DELETE /users/:id ใช้สำหรับลบข้อมูล user ที่มี id เป็นตัวเเปร
+app.delete('/users/:id', (req, res) => {
+  let id = req.params.id;
+  // หา index ของ user ที่ต้องการลบ
+  let selectedIndex = users.findIndex(user => user.id == id)
+  // ลบ 
+
+   users.splice(selectedIndex, 1)
+   res.json({
+      message: "Delete user successfully",
+      indexDelete: selectedIndex
     })
+  })
 
-    
-})
-
-//path: DELETE /user/:id ใช้สำหรับลบข้อมูล user ตาม id ที่ระบุ
-app.delete('/user/:id', (req, res) => {
-    let id = req.params.id;
-    //หา index ของ user ที่ต้องการลบ
-    let selectindex = users.findIndex(user => user.id == id)
-
-    //ลบ
-    users.splice[selectindex]
-    res.json({
-        message: 'Delete user successfully',
-        indexDeleted: selectindex
-    })
-})
-
-app.listen(port, (req,res) => {
-    console.log('Http Server is running on port' + port)
+app.listen(port, async(req, res) => {
+  await initMySQL()
+  console.log('Http server is running on port' + port);
 });
