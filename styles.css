@@ -1,67 +1,100 @@
-@font-face{
-    font-family:'Kanit';
+@font-face {
+    font-family: 'Kanit';
     src: url('./Kanit/Kanit-Regular.ttf');
 }
-body{
-    font-family:'Kanit';
+
+body {
+    font-family: 'Kanit';
+    background-color: #1a1a1a; /* พื้นหลังสีดำ */
+    color: #fff; /* ข้อความสีขาว */
 }
-.container{
+
+.container {
     width: 100%;
     max-width: 640px;
     margin-left: auto;
     margin-right: auto;
-    background-color: azure;
+    background-color: #333; /* พื้นหลังภายในกล่องเป็นสีเทาเข้ม */
     padding: 20px;
     box-sizing: border-box;
-
+    border-radius: 8px;
 }
-.header{
+
+.header {
     font-size: 30px;
     text-align: center;
     margin-bottom: 20px;
+    color: #d32f2f; /* หัวข้อสีแดงหรู */
 }
-.header-form{
-   width: 140px;
+
+.header-form {
+    width: 140px;
 }
-.flex{
-   display: flex;
+
+.flex {
+    display: flex;
 }
-.form-input{
+
+.form-input {
     margin-bottom: 10px;
 }
+
 input.form, textarea {
-    border: 1px solid #ccc;
+    border: 1px solid #d32f2f; /* ขอบสีแดง */
     width: 100%;
+    padding: 8px;
+    border-radius: 4px;
+    background-color: #555; /* พื้นหลังช่องกรอกข้อมูลสีเทาเข้ม */
+    color: #fff; /* ข้อความในช่องกรอกข้อมูลสีขาว */
 }
-.center{
+
+input.form:focus, textarea:focus {
+    outline: none;
+    border-color: #ff5722; /* เปลี่ยนสีขอบเมื่อคลิกเป็นสีส้ม */
+}
+
+.center {
     text-align: center;
 }
-.button{
+
+.button {
     border: 0;
     width: 100%;
     height: 40px;
+    background-color: #d32f2f; /* ปุ่มสีแดง */
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
 }
 
-.message{
+.button:hover {
+    background-color: #c62828; /* สีปุ่มเมื่อวางเมาส์เป็นสีแดงเข้ม */
+}
+
+.message {
     margin-top: 10px;
     padding: 10px;
-    background-color: lightgray;
+    background-color: #333; /* พื้นหลังข้อความสีเทาเข้ม */
     display: none;
+    border-radius: 4px;
 }
-.message.success{
-    background-color: lightgreen;
-    display: block;
-}
-.message.error{
-    background-color: lightcoral;
+
+.message.success {
+    background-color: #388e3c; /* ข้อความสำเร็จเป็นสีเขียว */
     display: block;
 }
 
-@media screen and (max-width: 768px){
-    .flex{
+.message.error {
+    background-color: #d32f2f; /* ข้อความผิดพลาดเป็นสีแดง */
+    display: block;
+    color: white;
+}
+
+@media screen and (max-width: 768px) {
+    .flex {
         flex-direction: column;
     }
-    .header{
+    .header {
         font-size: 20px;
     }
 }
